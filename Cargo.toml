@@ -1,9 +1,14 @@
 [package]
-name = "Platformer"
+name = "platformer"
 version = "0.1.0"
-authors = ["Cas Doornkamp <cas@undagrid.com>"]
+authors = ["Cas Doornkamp <cjdoornkamp@gmail.com>"]
 edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+piston2d-sprite = "0.59.0"
+piston_window = "0.107.0"
+find_folder = "0.3.0"
+piston-ai_behavior = "0.31.0"
+uuid = "0.6.5"
