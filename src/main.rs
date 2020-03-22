@@ -21,8 +21,9 @@ fn main() {
         .graphics_api(opengl)
         .build()
         .unwrap();
-
+ 
     let tileset = map.get_tileset_by_gid(1).unwrap();
+
     let tile_width = tileset.tile_width;
     let tile_height = tileset.tile_height;
     // println!("tilesetmap: {:?}", map);
@@ -95,17 +96,22 @@ fn main() {
         if let Some(Keyboard(key)) = e.press_args() {
             // deltas have to be whole numbers, otherwise the drawing will have glitches
             match key{
-                Key::D => x_view += 2.0,
-                Key::A => x_view -= 2.0,
-                Key::W => y_view -= 2.0, // up is negative directiion
-                Key::S => y_view += 2.0,
+                Key::D => x_view += 5.0,
+                Key::A => x_view -= 5.0,
+                Key::W => y_view -= 5.0, // up is negative directiion
+                Key::S => y_view += 5.0,
                 _ => {}
             }
         }
 
 
+        let bg_color = map.background_colour.unwrap();
+        let red: f32 = bg_color.red as f32 / 255.0;
+        let green: f32 = bg_color.green as f32 / 255.0;
+        let blue: f32 = bg_color.blue as f32 / 255.0;
+
         window.draw_2d(&e, |c, g, _| {
-            clear([0.5; 4], g);
+            clear([red, green, blue, 0.5], g);
 
             // scale and translate scene
             let trans = c.transform.scale(
@@ -131,18 +137,5 @@ fn main() {
                 );
             }
         });
-    }
-}
-
-fn get_tile(layer: &tiled::Layer, x: i32, y: i32, tile_width: u32, tile_height: u32) -> u32 {
- 
-    let y_max = layer.tiles.len();
-    let x_max = layer.tiles[0].len();
-    let x = (x / tile_width as i32) as usize;
-    let y = (y / tile_height as i32) as usize;
-    if x>= 0 && x < x_max && y >= 0 && y < y_max {
-        layer.tiles[y][x]
-    }else{
-        0
     }
 }
