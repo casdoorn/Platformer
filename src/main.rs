@@ -7,7 +7,6 @@ use piston_window::*;
 
 fn main() {
     let map = tiled::parse_file(&Path::new("assets/maps/map-2.tmx")).unwrap();
-
     let (width, height) = (600, 600);
     let opengl = OpenGL::V3_2;
     let mut window: PistonWindow = WindowSettings::new("piston: tiled", [width, height])
@@ -15,15 +14,16 @@ fn main() {
         .graphics_api(opengl)
         .build()
         .unwrap();
-
+ 
     let tileset = map.get_tileset_by_gid(1).unwrap();
+
     let tile_width = tileset.tile_width;
     let tile_height = tileset.tile_height;
 
     let ref mut texture_context = window.create_texture_context();
     let tileset_src = String::from("assets/maps/") + &tileset.images[0].source;
     println!("tileset: {}", tileset_src);
-    
+
     let tilesheet = tileset_src;
     let tilesheet = Texture::from_path(
         texture_context,
@@ -37,8 +37,14 @@ fn main() {
     let image = Image::new();
 
     while let Some(e) = window.next() {
+
+        let bg_color = map.background_colour.unwrap();
+        let red: f32 = bg_color.red as f32 / 255.0;
+        let green: f32 = bg_color.green as f32 / 255.0;
+        let blue: f32 = bg_color.blue as f32 / 255.0;
+
         window.draw_2d(&e, |c, g, _| {
-            clear([0.5; 4], g);
+            clear([red, green, blue, 0.5], g);
 
             for (y, row) in layer.tiles.iter().enumerate().clone() {
                 for (x, &tile) in row.iter().enumerate() {
@@ -72,4 +78,3 @@ fn main() {
         });
     }
 }
-
