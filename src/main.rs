@@ -1,7 +1,8 @@
 extern crate piston_window;
 extern crate sprite;
 extern crate ai_behavior;
-
+extern crate tiled;
+use std::path::Path;
 use std::rc::Rc;
 use uuid;
 
@@ -23,86 +24,76 @@ pub struct SpriteInfo{
 }
 
 fn main() {
+    let map = tiled::parse_file(&Path::new("assets/maps/test.tmx")).unwrap();
+    println!("{:?}", map);
+    println!("{:?}", map.get_tileset_by_gid(22));
+
+    let assets = find_folder::Search::ParentsThenKids(3, 3)
+    .for_folder("assets")
+    .unwrap();
+
     let (width, height) = (600, 600);
     let opengl = OpenGL::V3_2;
-    let mut window: PistonWindow =
-        WindowSettings::new("main window", (width, height))
+    let mut window: PistonWindow = WindowSettings::new("piston: tiled", [600, 600])
         .exit_on_esc(true)
         .graphics_api(opengl)
         .build()
         .unwrap();
 
-    let assets = find_folder::Search::ParentsThenKids(3, 3)
-        .for_folder("assets").unwrap();
-    let mut scene = Scene::new();
-    let mut texture_context = TextureContext {
-        factory: window.factory.clone(),
-        encoder: window.factory.create_command_buffer().into()
-    };
-    let tex = Rc::new(Texture::from_path(
-            &mut texture_context,
-            assets.join("random.png"),
-            Flip::None,
-            &TextureSettings::new()
-        ).unwrap());
-    
-    // Calculate background positions
-    let mut background_pos: Vec<[f64;2]> = Vec::new();
-    for x in (32..width).step_by(64){
-        for y in (32..height).step_by(64){
-            background_pos.push([x as f64, y as f64]);
-        }
-    }
+    let tileset = map.get_tileset_by_gid(1).unwrap();
+    let tile_width = tileset.tile_width;
+    let tile_height = tileset.tile_height;
 
-    // keep track of generated 
-    let mut background_ids: Vec<SpriteInfo> = Vec::new();
-    // fill background with random.png images
-    for sprite_pos in background_pos{
-        let mut sprite = Sprite::from_texture(tex.clone());
-        sprite.set_position(sprite_pos[0], sprite_pos[1]);
-        // add sprite to the scene
-        let id = scene.add_child(sprite);
-        // store x,y and id of the sprite
-        background_ids.push(SpriteInfo{
-                                x: sprite_pos[0], 
-                                y: sprite_pos[1],
-                                ID: id}
-                            );
-    }
+    let ref mut texture_context = window.create_texture_context();
 
-    // Run a sequence of animations.
-    // let seq = Sequence(vec![
-    //     Action(Ease(EaseFunction::CubicOut, Box::new(ScaleTo(2.0, 0.5, 0.5)))),
-    //     Action(Ease(EaseFunction::BounceOut, Box::new(MoveBy(1.0, 0.0, 100.0)))),
-    //     Action(Ease(EaseFunction::ElasticOut, Box::new(MoveBy(2.0, 0.0, -100.0)))),
-    //     Action(Ease(EaseFunction::BackInOut, Box::new(MoveBy(1.0, 0.0, -100.0)))),
-    //     Wait(0.5),
-    //     Action(Ease(EaseFunction::ExponentialInOut, Box::new(MoveBy(1.0, 0.0, 100.0)))),
-    //     Action(Blink(1.0, 5)),
-    //     While(Box::new(WaitForever), vec![
-    //         Action(Ease(EaseFunction::QuadraticIn, Box::new(FadeOut(1.0)))),
-    //         Action(Ease(EaseFunction::QuadraticOut, Box::new(FadeIn(1.0)))),
-    //     ]),
-    // ]);
-    // scene.run(id, &seq);
+    let tileset_src = &tileset.images[0].source;
+    println!("tileset: {}", tileset_src);
+    let tilesheet = tileset_src;
+    let tilesheet = Texture::from_path(
+        texture_context,
+        &tilesheet,
+        Flip::None,
+        &TextureSettings::new(),
+    ).unwrap();
 
-    // // This animation and the one above can run in parallel.
-    // let rotate = Action(Ease(EaseFunction::ExponentialInOut,
-    //     Box::new(RotateTo(2.0, 360.0))));
-    // scene.run(id, &rotate);
-
-    println!("Press any key to pause/resume the animation!");
+    let (width, _) = tilesheet.get_size();
+    let layer: &tiled::Layer = &map.layers[0];
+    let image = Image::new();
 
     while let Some(e) = window.next() {
-        scene.event(&e);
-
         window.draw_2d(&e, |c, g, _| {
-            clear([1.0, 1.0, 1.0, 1.0], g);
-            scene.draw(c.transform, g);
+            clear([0.5; 4], g);
+
+            for (y, row) in layer.tiles.iter().enumerate().clone() {
+                for (x, &tile) in row.iter().enumerate() {
+                    if tile == 0 {
+                        continue;
+                    }
+
+                    let tile = tile - 1; // tiled counts from 1
+
+                    // rect of the particular tile in the tilesheet
+                    let src_rect = [
+                        (tile % (width / tile_width) * tile_width) as f64,
+                        (tile / (width / tile_height) * tile_height) as f64,
+                        tile_width as f64,
+                        tile_height as f64,
+                    ];
+
+                    let trans = c.transform.trans(
+                        x as f64 * tile_width as f64,
+                        y as f64 * tile_height as f64,
+                    );
+
+                    image.src_rect(src_rect).draw(
+                        &tilesheet,
+                        &DrawState::default(),
+                        trans,
+                        g,
+                    );
+                }
+            }
         });
-        if let Some(_) = e.press_args() {
-            // scene.toggle(id, &seq);
-            // scene.toggle(id, &rotate);
-        }
     }
 }
+
