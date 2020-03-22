@@ -3,38 +3,14 @@ extern crate sprite;
 extern crate ai_behavior;
 extern crate tiled;
 use std::path::Path;
-use std::rc::Rc;
-use uuid;
-
 use piston_window::*;
-use sprite::*;
-
-use ai_behavior::{
-    Action,
-    Sequence,
-    Wait,
-    WaitForever,
-    While,
-};
-
-pub struct SpriteInfo{
-    x: f64,
-    y: f64,
-    ID: uuid::Uuid
-}
 
 fn main() {
-    let map = tiled::parse_file(&Path::new("assets/maps/test.tmx")).unwrap();
-    println!("{:?}", map);
-    println!("{:?}", map.get_tileset_by_gid(22));
-
-    let assets = find_folder::Search::ParentsThenKids(3, 3)
-    .for_folder("assets")
-    .unwrap();
+    let map = tiled::parse_file(&Path::new("assets/maps/map-2.tmx")).unwrap();
 
     let (width, height) = (600, 600);
     let opengl = OpenGL::V3_2;
-    let mut window: PistonWindow = WindowSettings::new("piston: tiled", [600, 600])
+    let mut window: PistonWindow = WindowSettings::new("piston: tiled", [width, height])
         .exit_on_esc(true)
         .graphics_api(opengl)
         .build()
@@ -45,9 +21,9 @@ fn main() {
     let tile_height = tileset.tile_height;
 
     let ref mut texture_context = window.create_texture_context();
-
-    let tileset_src = &tileset.images[0].source;
+    let tileset_src = String::from("assets/maps/") + &tileset.images[0].source;
     println!("tileset: {}", tileset_src);
+    
     let tilesheet = tileset_src;
     let tilesheet = Texture::from_path(
         texture_context,
