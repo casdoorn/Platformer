@@ -18,9 +18,6 @@ fn main() {
     let opengl = OpenGL::V3_2;
     let mut window: PistonWindow = WindowSettings::new("piston: tiled", [width, height])
         .exit_on_esc(true)
-        .resizable(true)
-        .controllers(true)
-	    .samples(0)
         .graphics_api(opengl)
         .build()
         .unwrap();
@@ -114,12 +111,7 @@ fn main() {
         let blue: f32 = bg_color.blue as f32 / 255.0;
 
         window.draw_2d(&e, |c, g, _| {
-            if let Some(bg_color) = map.background_colour {
-                let (red, green, blue) = (bg_color.red as f32 / 255.0,  bg_color.green as f32 / 255.0,  bg_color.red as f32 / 255.0);
-                clear([red, green, blue, 0.5], g);
-            } else {
-                clear([1.0, 1.0, 1.0, 0.5], g);
-            }
+            clear([red, green, blue, 0.5], g);
 
             // scale and translate scene
             let trans = c.transform.scale(
