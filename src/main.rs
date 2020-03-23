@@ -1,7 +1,7 @@
 extern crate piston_window;
 extern crate sprite;
 extern crate ai_behavior;
-extern crate tiled;
+
 use piston_window::*;
 use piston_window::Button::Keyboard;
 
@@ -31,7 +31,6 @@ fn main() {
                 _ => {}
             }
         }
-
 
         window.draw_2d(&e, |c, g, _| {
             clear([1.0, 0.0, 1.0, 0.5], g);
