@@ -6,11 +6,14 @@ use std::path::Path;
 use piston_window::*;
 
 fn main() {
-    let map = tiled::parse_file(&Path::new("assets/maps/map-2.tmx")).unwrap();
+    let map = tiled::parse_file(&Path::new("assets/maps/map-3.tmx")).unwrap();
     let (width, height) = (600, 600);
     let opengl = OpenGL::V3_2;
     let mut window: PistonWindow = WindowSettings::new("piston: tiled", [width, height])
         .exit_on_esc(true)
+        .resizable(true)
+        .controllers(true)
+	    .samples(0)
         .graphics_api(opengl)
         .build()
         .unwrap();
@@ -35,16 +38,16 @@ fn main() {
     let (width, _) = tilesheet.get_size();
     let layer: &tiled::Layer = &map.layers[0];
     let image = Image::new();
+    window.set_lazy(true);
 
     while let Some(e) = window.next() {
-
-        let bg_color = map.background_colour.unwrap();
-        let red: f32 = bg_color.red as f32 / 255.0;
-        let green: f32 = bg_color.green as f32 / 255.0;
-        let blue: f32 = bg_color.blue as f32 / 255.0;
-
         window.draw_2d(&e, |c, g, _| {
-            clear([red, green, blue, 0.5], g);
+            if let Some(bg_color) = map.background_colour {
+                let (red, green, blue) = (bg_color.red as f32 / 255.0,  bg_color.green as f32 / 255.0,  bg_color.red as f32 / 255.0);
+                clear([red, green, blue, 0.5], g);
+            } else {
+                clear([1.0, 1.0, 1.0, 0.5], g);
+            }
 
             for (y, row) in layer.tiles.iter().enumerate().clone() {
                 for (x, &tile) in row.iter().enumerate() {
