@@ -1,48 +1,37 @@
-extern crate piston_window;
-extern crate sprite;
-extern crate ai_behavior;
+use amethyst::{
+    core::transform::TransformBundle,
+    prelude::*,
+    renderer::{
+        plugins::{RenderFlat2D, RenderToWindow},
+        types::DefaultBackend,
+        RenderingBundle,
+    },
+    utils::application_root_dir,
+};
 
-use piston_window::*;
-use piston_window::Button::Keyboard;
+mod state;
 
-fn main() {
-    // player pos and view scale
-    let scale = 1.0;
-    let (mut x_view, mut y_view) = (0.0, 0.0);
+fn main() -> amethyst::Result<()> {
+    amethyst::start_logger(Default::default());
 
-    // window settings
-    let (width, height) = (900, 600);
-    let opengl = OpenGL::V3_2;
-    let mut window: PistonWindow = WindowSettings::new("piston: tiled", [width, height])
-        .exit_on_esc(true)
-        .graphics_api(opengl)
-        .build()
-        .unwrap();
+    let app_root = application_root_dir()?;
 
-    // draw/event loop
-    while let Some(e) = window.next() {
-        if let Some(Keyboard(key)) = e.press_args() {
-            // deltas have to be whole numbers, otherwise the drawing will have glitches
-            match key{
-                Key::D => x_view += 5.0,
-                Key::A => x_view -= 5.0,
-                Key::W => y_view -= 5.0, // up is negative directiion
-                Key::S => y_view += 5.0,
-                _ => {}
-            }
-        }
+    let resources = app_root.join("resources");
+    let display_config = resources.join("display_config.ron");
 
-        window.draw_2d(&e, |c, g, _| {
-            clear([1.0, 0.0, 1.0, 0.5], g);
+    let game_data = GameDataBuilder::default()
+        .with_bundle(TransformBundle::new())?
+        .with_bundle(
+            RenderingBundle::<DefaultBackend>::new()
+                .with_plugin(
+                    RenderToWindow::from_config_path(display_config)
+                        .with_clear([0.34, 0.36, 0.52, 1.0]),
+                )
+                .with_plugin(RenderFlat2D::default()),
+        )?;
 
-            // scale and translate scene
-            let trans = c.transform.scale(
-                scale as f64,
-                scale as f64,
-            ).trans(
-                -x_view,
-                -y_view
-            );
-        });
-    }
+    let mut game = Application::new(resources, state::MyState, game_data)?;
+    game.run();
+
+    Ok(())
 }
