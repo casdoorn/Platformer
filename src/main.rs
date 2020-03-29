@@ -8,13 +8,14 @@ use amethyst::{
     },
     utils::application_root_dir,
 };
+use std::env;
 
 mod state;
 
 fn main() -> amethyst::Result<()> {
     amethyst::start_logger(Default::default());
 
-    let app_root = application_root_dir()?;
+    let app_root = env::current_dir()?;
 
     let resources = app_root.join("resources");
     let display_config = resources.join("display_config.ron");
