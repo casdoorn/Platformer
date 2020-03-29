@@ -31,6 +31,14 @@ impl SimpleState for MyState {
         init_sprites(world, &sprites, &dimensions);
     }
 
+    // This function is called every 1/60th second
+    fn fixed_update(
+        &mut self, 
+        _data: StateData<'_, GameData<'_, '_>>
+    ) -> SimpleTrans {
+        Trans::None
+    }
+
     fn handle_event(
         &mut self,
         mut _data: StateData<'_, GameData<'_, '_>>,

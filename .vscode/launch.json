@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "(Windows) Launch",
+            "name": "(Windows) Debug Launch",
             "type": "cppvsdbg",
             "request": "launch",
             "program": "${workspaceFolder}/target/debug/platformer.exe",
@@ -17,7 +17,7 @@
             "preLaunchTask": "cargo build"
         },
         {
-            "name": "(OSX) Launch",
+            "name": "(OSX) Debug Launch",
             "type": "lldb",
             "request": "launch",
             "program": "${workspaceRoot}/target/debug/platformer",

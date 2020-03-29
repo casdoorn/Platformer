@@ -5,11 +5,24 @@
     "tasks": [
         {
             "label": "cargo build",
-            "type": "cargo",
-            "subcommand": "build",
+            "type": "shell",
             "problemMatcher": [
                 "$rustc"
             ],
+            "command": "cargo",
+            "args": [
+                "build",
+                "--features",
+                "\"vulkan\""
+            ],
+            "osx": {
+                "command": "cargo",
+                "args": [
+                    "build",
+                    "--features",
+                    "\"metal\""
+                ]
+            },
             "group": "build"
         }
     ]
